@@ -1,0 +1,11 @@
+{
+  "name": "cap-be",
+  "version": "1.0.0",
+  "description": "capstone backend",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
