@@ -1,0 +1,33 @@
+config/cap-healthcare-firebase-adminsdk-fbsvc-3a0a707c3d.json
+.env
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Firebase Admin SDK private key
+config/*.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# IDE/editor folders
+.vscode/
+.idea/
+*.sw?
+
+# Build folders (if using TypeScript or bundlers)
+dist/
+build/
+
+# Optional: test coverage and temp files
+coverage/
+.tmp/
