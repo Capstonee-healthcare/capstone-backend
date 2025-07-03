@@ -1,13 +1,19 @@
-const { db } = require("../config/firebaseAdmin");
+const { db } = require("../config/fireBaseAdmin");
 
 exports.completeSession = async (req, res) => {
 	const { uid } = req.params;
 	const userRef = db.collection("users").doc(uid);
 	const userDoc = await userRef.get();
 
+	const today = new Date().toLocaleDateString("en-CA", {
+		timeZone: "America/Vancouver", // 👈 Vancouver date
+	}); // format: YYYY-MM-DD
+
 	if (!userDoc.exists) {
-		await userRef.set({
+		const newUserData = {
 			streak: 1,
+			exerciseCompleted: true,
+			lastCompletedDate: today,
 			badges: {
 				day7: false,
 				day14: false,
@@ -15,29 +21,68 @@ exports.completeSession = async (req, res) => {
 				day60: false,
 				day100: false,
 			},
+		};
+
+		await userRef.set(newUserData);
+		return res.status(200).json({
+			message: "User created and streak started",
+			...newUserData,
 		});
-		return res.status(200).json({ message: "User created and streak started" });
 	}
 
 	const data = userDoc.data();
-	const newStreak = (data.streak || 0) + 1;
+	const lastDate = data.lastCompletedDate || null;
+
+	// 🕒 Reset exerciseCompleted to false if it's a new day
+	if (lastDate !== today && data.exerciseCompleted === true) {
+		await userRef.update({
+			exerciseCompleted: false,
+		});
+	}
+
+	// ⛔ Already done today
+	if (lastDate === today && data.exerciseCompleted === true) {
+		return res.status(200).json({
+			message: "Exercise already completed today",
+			streak: data.streak,
+			exerciseCompleted: true,
+			badges: data.badges,
+		});
+	}
+
+	// ✅ Increment streak if yesterday was last completed
+	let newStreak = 1;
+	if (lastDate) {
+		const yesterday = new Date();
+		yesterday.setDate(yesterday.getDate() - 1);
+		const expected = yesterday.toLocaleDateString("en-CA", {
+			timeZone: "America/Vancouver",
+		});
+		if (lastDate === expected) {
+			newStreak = data.streak + 1;
+		}
+	}
+
+	// 🏅 Badge milestone logic
 	const badges = data.badges || {};
+	if (newStreak === 7) badges.day7 = true;
+	if (newStreak === 14) badges.day14 = true;
+	if (newStreak === 30) badges.day30 = true;
+	if (newStreak === 60) badges.day60 = true;
+	if (newStreak === 100) badges.day100 = true;
 
-	const updateBadges = { ...badges };
-
-	// Check for milestones
-	if (newStreak === 7) updateBadges.day7 = true;
-	if (newStreak === 14) updateBadges.day14 = true;
-	if (newStreak === 30) updateBadges.day30 = true;
-	if (newStreak === 60) updateBadges.day60 = true;
-	if (newStreak === 100) updateBadges.day100 = true;
-
+	// 📌 Final update
 	await userRef.update({
 		streak: newStreak,
-		badges: updateBadges,
+		exerciseCompleted: true,
+		lastCompletedDate: today,
+		badges,
 	});
 
-	res
-		.status(200)
-		.json({ message: "Streak updated", newStreak, badges: updateBadges });
+	res.status(200).json({
+		message: "Streak updated",
+		streak: newStreak,
+		exerciseCompleted: true,
+		badges,
+	});
 };
