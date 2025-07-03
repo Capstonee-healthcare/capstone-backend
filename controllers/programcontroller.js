@@ -13,8 +13,7 @@ const getProgramById = async (req, res) => {
 
 		return res.status(200).json({ id: doc.id, ...doc.data() });
 	} catch (error) {
-		console.error("🔥 Error fetching program:", error); // <-- Log error here
-		return res.status(500).json({ message: "Internal Server Error" });
+		
 	}
 };
 

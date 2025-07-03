@@ -33,14 +33,14 @@ exports.completeSession = async (req, res) => {
 	const data = userDoc.data();
 	const lastDate = data.lastCompletedDate || null;
 
-	// 🕒 Reset exerciseCompleted to false if it's a new day
+	// Reset exerciseCompleted to false if it's a new day
 	if (lastDate !== today && data.exerciseCompleted === true) {
 		await userRef.update({
 			exerciseCompleted: false,
 		});
 	}
 
-	// ⛔ Already done today
+	// Already done today
 	if (lastDate === today && data.exerciseCompleted === true) {
 		return res.status(200).json({
 			message: "Exercise already completed today",
@@ -50,7 +50,7 @@ exports.completeSession = async (req, res) => {
 		});
 	}
 
-	// ✅ Increment streak if yesterday was last completed
+	// Increment streak if yesterday was last completed
 	let newStreak = 1;
 	if (lastDate) {
 		const yesterday = new Date();
@@ -63,7 +63,7 @@ exports.completeSession = async (req, res) => {
 		}
 	}
 
-	// 🏅 Badge milestone logic
+	//  Badge milestone logic
 	const badges = data.badges || {};
 	if (newStreak === 7) badges.day7 = true;
 	if (newStreak === 14) badges.day14 = true;
@@ -71,7 +71,6 @@ exports.completeSession = async (req, res) => {
 	if (newStreak === 60) badges.day60 = true;
 	if (newStreak === 100) badges.day100 = true;
 
-	// 📌 Final update
 	await userRef.update({
 		streak: newStreak,
 		exerciseCompleted: true,
