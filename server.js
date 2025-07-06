@@ -12,3 +12,7 @@ app.use("/api", programRoutes);
 app.use("/api/user", userRoutes);
 
 app.listen(3000, () => console.log("✅ Server running on port 3000"));
+
+
+
+// test the routes
