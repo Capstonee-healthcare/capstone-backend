@@ -1,4 +1,4 @@
-const { db } = require("../config/fireBaseAdmin");
+const { db } = require("../config/firebaseAdmin");
 
 exports.completeSession = async (req, res) => {
 	const { uid } = req.params;
