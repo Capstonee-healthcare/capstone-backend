@@ -1,7 +1,20 @@
-const { db } = require("../config/fireBaseAdmin");
+const { db } = require("../config/firebaseAdmin");
 
 exports.completeSession = async (req, res) => {
+	// Get UID from authenticated user (from JWT token)
+	const authenticatedUid = req.user.uid;
+	
+	// Get UID from URL params
 	const { uid } = req.params;
+
+	// Security check: Ensure the authenticated user matches the requested UID
+	if (authenticatedUid !== uid) {
+		return res.status(403).json({
+			error: "Forbidden",
+			message: "You can only update your own data.",
+		});
+	}
+
 	const userRef = db.collection("users").doc(uid);
 	const userDoc = await userRef.get();
 
